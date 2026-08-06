@@ -1,5 +1,5 @@
 @host = http://127.0.0.1:8000
-
+@token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjozLCJleHAiOjE3ODg2MDUyOTd9.tzoB3MOzmRPuecNA_je1z_2jbJkw9ECduBghN5G93qI"
 
 GET {{host}}/
 
@@ -15,9 +15,16 @@ username=yash@example.com&password=mummyily
 
 ###
 POST {{host}}/login
+Content-Type: application/x-www-form-urlencoded
+
+username=yash@example.com&password=mummyily
+
+###
+POST {{host}}/posts
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
-  "email": "yash@example.com",
-  "password": "mummyily"
+  "title": "mummy",
+  "content": "mummyily"
 }
