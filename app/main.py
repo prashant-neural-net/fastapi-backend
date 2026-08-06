@@ -1,13 +1,12 @@
-from fastapi import FastAPI, Response, status, HTTPException, Depends
+from fastapi import FastAPI, Response,HTTPException
 from fastapi.params import Body
 from typing import Optional, List
-from random import randrange
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import time
 from sqlalchemy.orm import Session
-from . import models, schemas, utils
-from .database import engine, get_db
+from . import models
+from .database import engine
 from .routers import user, post, auth
 
 models.Base.metadata.create_all(bind=engine)
@@ -18,7 +17,7 @@ app = FastAPI()
 while True:
     try:
         conn = psycopg2.connect(
-            host="127.0.0.1",
+            host="localhost",
             database="fastapi",
             user="yash",
             password="password123",
