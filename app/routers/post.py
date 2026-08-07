@@ -29,15 +29,15 @@ def get_post(db: Session = Depends(get_db)):
 @router.post(
     "/", status_code=status.HTTP_201_CREATED, response_model=schemas.PostResponse
 )
-def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)):
+def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db), curr_user: int = Depends(oauth2.get_current_user)):
 
     # cursor.execute(
     #     """INSERT INTO posts (title, content, is_published) VALUES (%s, %s, %s) RETURNING *""",
     #     (post.title, post.content, post.is_published),
     # )
     # new_post = cursor.fetchone()
-
-    new_post = models.Post(**post.dict())
+    print(curr_user.email)
+    new_post = models.Post(**post.model_dump())
     db.add(new_post)
     db.commit()
     db.refresh(new_post)
@@ -66,7 +66,7 @@ def get_post_by_id(id: int, db: Session = Depends(get_db)):
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_post(id: int, db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)):
+def delete_post(id: int, db: Session = Depends(get_db), curr_user: int = Depends(oauth2.get_current_user)):
     # cursor.execute("""DELETE FROM posts where id = %s RETURNING *""", (id,))
     # deleted_post = cursor.fetchone()
     # conn.commit()
@@ -104,7 +104,7 @@ def update_post(id: int, post: schemas.PostCreate, db: Session = Depends(get_db)
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"post with id: {id} does not exist",
         )
-    post_query.update(post.dict(), synchronize_session=False)
+    post_query.update(post.model_dump(), synchronize_session=False)
     db.commit()
 
     return post_query.first()

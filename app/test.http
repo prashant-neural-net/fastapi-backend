@@ -1,5 +1,5 @@
 @host = http://127.0.0.1:8000
-@token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjozLCJleHAiOjE3ODg2MDUyOTd9.tzoB3MOzmRPuecNA_je1z_2jbJkw9ECduBghN5G93qI"
+@token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjozLCJleHAiOjE3ODYwODQ1NjJ9.qrB5V3Y6wpRuli2VeDvrvsvxmdF6-wWK_ZWXaOMO6vI"
 
 GET {{host}}/
 
@@ -22,9 +22,9 @@ username=yash@example.com&password=mummyily
 ###
 POST {{host}}/posts
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjozLCJleHAiOjE3ODYwODkyODN9.LEvaCr9s5sFOSW6DlMpqC5EbqGazbTP2cZ6CKIbzsLo
 
 {
-  "title": "mummy",
+  "title": "maa",
   "content": "mummyily"
 }
