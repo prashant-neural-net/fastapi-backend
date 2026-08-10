@@ -32,3 +32,18 @@ def get_user(id: int, db: Session = Depends(get_db)):
         )
 
     return user
+
+
+@router.get(
+    "/{user_id}/posts",
+    status_code=status.HTTP_200_OK,
+    response_model=list[schemas.PostBase],
+)
+def get_all_post_of_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+):
+
+    posts = db.query(models.Post).filter(models.Post.user_id == user_id).all()
+
+    return posts
