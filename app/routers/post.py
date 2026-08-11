@@ -4,13 +4,13 @@ from .. import schemas
 from sqlalchemy.orm import Session
 from .. import models, schemas, oauth2
 from ..database import engine, get_db
+from sqlalchemy import func
+from ..utils import orm_to_dict
 
 router = APIRouter(prefix="/posts", tags=["Posts"])
 
 
-@router.get(
-    "/", status_code=status.HTTP_200_OK, response_model=List[schemas.PostResponse]
-)
+@router.get("/", status_code=status.HTTP_200_OK)
 def get_posts(
     db: Session = Depends(get_db),
     get_current_user: int = Depends(oauth2.get_current_user),
@@ -30,8 +30,14 @@ def get_posts(
         .offset(skip)
         .all()
     )
+    # select posts.*,  count(votes.post_id) from posts left join votes on votes.post_id = posts.id group by posts.id;
+    results = (
+        db.query(models.Post, func.count(models.Vote.post_id).label("votes"))
+        .join(models.Vote, models.Post.id == models.Vote.post_id, isouter=True)
+        .group_by(models.Post.id)
+    ).all()
 
-    return posts
+    return results
 
 
 @router.post(

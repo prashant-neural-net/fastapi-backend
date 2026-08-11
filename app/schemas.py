@@ -43,6 +43,9 @@ class PostResponse(PostBase):
     class Config:
         from_attributes = True
 
+class PostOut(PostBase):
+    Post: PostResponse
+    
 
 class Token(BaseModel):
     access_token: str

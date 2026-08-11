@@ -46,6 +46,7 @@ def delete_vote(
     db.commit()
     
     
+
     
 
     
