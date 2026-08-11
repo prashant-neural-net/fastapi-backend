@@ -10,10 +10,12 @@ from ..utils import orm_to_dict
 router = APIRouter(prefix="/posts", tags=["Posts"])
 
 
-@router.get("/", status_code=status.HTTP_200_OK)
+@router.get(
+    "/", status_code=status.HTTP_200_OK, response_model=list[schemas.PostWithVotes]
+)
 def get_posts(
     db: Session = Depends(get_db),
-    get_current_user: int = Depends(oauth2.get_current_user),
+    get_current_user: models.User = Depends(oauth2.get_current_user),
     limit: int = 10,
     skip: int = 0,
     search: Optional[str] = "",
@@ -23,19 +25,26 @@ def get_posts(
     # cursor.execute("""SELECT * FROM posts""")
     # posts = cursor.fetchall()
     # print(limit)
-    posts = (
-        db.query(models.Post)
+    # posts = (
+    #     db.query(models.Post)
+    #     .filter(models.Post.title.contains(search))
+    #     .limit(limit)
+    #     .offset(skip)
+    #     .all()
+    # )
+    # select posts.*,  count(votes.post_id) from posts left join votes on votes.post_id = posts.id group by posts.id;
+
+    results = (
+        (
+            db.query(models.Post, func.count(models.Vote.post_id).label("votes"))
+            .join(models.Vote, models.Post.id == models.Vote.post_id, isouter=True)
+            .group_by(models.Post.id)
+        )
         .filter(models.Post.title.contains(search))
         .limit(limit)
         .offset(skip)
         .all()
     )
-    # select posts.*,  count(votes.post_id) from posts left join votes on votes.post_id = posts.id group by posts.id;
-    results = (
-        db.query(models.Post, func.count(models.Vote.post_id).label("votes"))
-        .join(models.Vote, models.Post.id == models.Vote.post_id, isouter=True)
-        .group_by(models.Post.id)
-    ).all()
 
     return results
 
@@ -64,29 +73,34 @@ def create_posts(
 
 
 @router.get(
-    "/{id}", status_code=status.HTTP_200_OK, response_model=schemas.PostResponse
+    "/{id}", status_code=status.HTTP_200_OK, response_model=schemas.PostWithVotes
 )
 def get_post_by_id(id: int, db: Session = Depends(get_db)):
 
     # cursor.execute("""SELECT * FROM posts where id = %s """, (id,))
     # post = cursor.fetchone()
 
-    post_query = db.query(models.Post).filter(models.Post.id == id)
-    if post.first() is None:
+    post = (
+        db.query(models.Post, func.count(models.Vote.post_id).label("votes"))
+        .join(models.Vote, models.Post.id == models.Vote.post_id, isouter=True)
+        .group_by(models.Post.id)
+        .filter(models.Post.id == id)
+        .first()
+    )
+    if post is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"post with id: {id} does not exist",
         )
 
-    else:
-        return post.first()
+    return post
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_post(
     id: int,
     db: Session = Depends(get_db),
-    curr_user: int = Depends(oauth2.get_current_user),
+    curr_user: models.User = Depends(oauth2.get_current_user),
 ):
     # cursor.execute("""DELETE FROM posts where id = %s RETURNING *""", (id,))
     # deleted_post = cursor.fetchone()
