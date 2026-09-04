@@ -11,10 +11,10 @@ router = APIRouter(prefix="/users", tags=["Users"])
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
     #check whether the user exists
-    user = db.query(models.User).filter(models.User.email == user.email).first()
-    if user:
+    user_search = db.query(models.User).filter(models.User.email == user.email).first()
+    if user_search:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT,
-                            detail=f"user {user.email} already exists")
+                            detail=f"user {user_search.email} already exists")
     # hash the password - user.password
     hashed_pwd = utils.hash(user.password)
     user.password = hashed_pwd
