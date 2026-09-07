@@ -40,6 +40,7 @@ class PostResponse(PostBase):
     created_at: datetime
     user_id: int
     user: UserOut
+    
 
 
 class PostWithVotes(BaseModel):
